@@ -11,7 +11,9 @@ PATTERN = "(?i)(" + GH_P + "|" + AKIA + "|" + SLACK + ")"
 
 bad: list[str] = []
 for path in root.rglob("*"):
-    if ".git/" in str(path) or not path.is_file():
+    if ".git/" in str(path) or "__pycache__" in str(path) or not path.is_file():
+        continue
+    if path.suffix == ".pyc":
         continue
     if path.name == "secrets_guard.py":
         continue

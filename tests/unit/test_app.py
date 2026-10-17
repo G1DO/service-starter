@@ -26,12 +26,29 @@ class ProbeTests(unittest.TestCase):
         for key in ("timestamp", "level", "service", "message", "trace_id", "span_id"):
             self.assertIn(key, record)
 
-    def test_no_secret_keys_in_logs(self) -> None:
-        import inspect
+    def test_log_redacts_secret_values(self) -> None:
+        import io
+        from contextlib import redirect_stdout
 
-        src = inspect.getsource(app.log)
-        for banned in ("password", "secret", "api_key", "token"):
-            self.assertNotIn(banned, src.lower())
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            app.log(
+                "login_attempt",
+                username="alice",
+                password="s3cr3t-value-9f8e",
+                nested={"token": "tok-abc123-def456", "role": "admin"},
+                tags=["a", "b"],
+            )
+        out = buf.getvalue()
+        record = json.loads(out)
+        self.assertNotIn("s3cr3t-value-9f8e", out)
+        self.assertNotIn("tok-abc123-def456", out)
+        self.assertEqual(record["password"], "***REDACTED***")
+        self.assertEqual(record["nested"]["token"], "***REDACTED***")
+        # Non-sensitive fields pass through untouched.
+        self.assertEqual(record["username"], "alice")
+        self.assertEqual(record["nested"]["role"], "admin")
+        self.assertEqual(record["tags"], ["a", "b"])
 
 
 if __name__ == "__main__":

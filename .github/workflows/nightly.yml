@@ -14,5 +14,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python3 -m unittest discover -s tests/unit -v
-      - run: python3 -m unittest discover -s tests/integration -v
+      - uses: go-task/setup-task@v1
+      - run: task test
+      - run: task test:int
+      - run: task test:e2e
+      - run: task test:contract
+      - run: task build
+      - run: task check:sast
+      - run: task check:secrets
+      - run: task check:audit
+      - run: task check:hygiene
+      - run: task diagrams

@@ -7,7 +7,9 @@ root = pathlib.Path(__file__).resolve().parents[1]
 failures: list[str] = []
 
 for path in root.rglob("*"):
-    if ".git/" in str(path) or path.is_dir():
+    if ".git/" in str(path) or "__pycache__" in str(path) or path.is_dir():
+        continue
+    if path.suffix == ".pyc":
         continue
     if path.name == "hygiene.py":
         continue
@@ -23,12 +25,18 @@ for path in root.rglob("*"):
         failures.append(f"{path}: contains stub marker")
     if re.search(r"\|\|\s*true", text):
         failures.append(f"{path}: swallows failures via || true")
+    if re.search("python3?\\s+-c\\s+[\"']print\\s*\\(", text):
+        failures.append(f"{path}: contains inline print stub (move real logic into scripts/)")
+    if re.search("assertTrue\\s*\\(\\s*True\\s*\\)", text):
+        failures.append(f"{path}: contains placeholder assertion")
 
 codeowners = (root / ".github" / "CODEOWNERS").read_text()
 for must in ("/src/auth/", "/src/data/", "migrations/", "/openapi", "/.github/"):
     alt = must.strip("/")
     if must not in codeowners and alt not in codeowners:
         failures.append(f"CODEOWNERS: missing coverage for {must}")
+if not re.search(r"(?m)^\*\s+@\S+", codeowners):
+    failures.append("CODEOWNERS: missing fallback `*` owner")
 
 ci = (root / ".github" / "workflows" / "ci.yml").read_text()
 for needle in ("dorny/paths-filter", "needs: [changes", "contains(github.event.pull_request.labels"):
