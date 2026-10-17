@@ -59,7 +59,7 @@ tasks:
       - python3 scripts/hygiene.py
 
   diagrams:
-    desc: Structurizr validate + Notion path+version link check (local only)
+    desc: DSL pointer check (validity via editor extension / Lite preview)
     cmds:
       - python3 scripts/diagrams.py
 
