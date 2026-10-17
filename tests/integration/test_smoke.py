@@ -1,14 +1,18 @@
-"""Integration placeholder: runs only when data/infra paths or risk triggers fire.
+"""Integration: exercise the real HTTP probes against a live server subprocess."""
 
-Requires no live DB yet. Fails loudly if turned into an echo stub.
-"""
-
+import pathlib
+import sys
 import unittest
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "scripts"))
 
-class IntegrationSmoke(unittest.TestCase):
-    def test_placeholder_is_real(self) -> None:
-        self.assertTrue(True)
+from probe import check_probes, run_local
+
+
+class ProbeIntegrationTests(unittest.TestCase):
+    def test_probes_end_to_end(self) -> None:
+        with run_local() as base:
+            check_probes(base)
 
 
 if __name__ == "__main__":

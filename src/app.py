@@ -8,6 +8,23 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 SERVICE = "service-starter"
 
+REDACTED = "***REDACTED***"
+REDACT_KEYS = frozenset({
+    "password", "passwd", "secret", "client_secret", "token",
+    "access_token", "refresh_token", "api_key", "apikey",
+    "authorization", "cookie", "set-cookie",
+})
+
+
+def _redact(value: object, key: object = None) -> object:
+    if isinstance(key, str) and key.lower() in REDACT_KEYS:
+        return REDACTED
+    if isinstance(value, dict):
+        return {k: _redact(v, k) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_redact(v) for v in value]
+    return value
+
 
 def log(event: str, **fields: object) -> None:
     record = {
@@ -18,7 +35,7 @@ def log(event: str, **fields: object) -> None:
         "trace_id": os.environ.get("TRACE_ID", "none"),
         "span_id": os.environ.get("SPAN_ID", "none"),
     }
-    record.update(fields)
+    record.update({k: _redact(v, k) for k, v in fields.items()})
     sys.stdout.write(json.dumps(record) + "\n")
 
 
@@ -53,7 +70,7 @@ class Handler(BaseHTTPRequestHandler):
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
     log("startup", port=port)
-    HTTPServer(("0.0.0.0", port)).serve_forever()
+    HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
 
 if __name__ == "__main__":

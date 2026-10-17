@@ -18,19 +18,19 @@ tasks:
       - python3 -m unittest discover -s tests/integration -v
 
   test:e2e:
-    desc: End-to-end against real target or compose stack
+    desc: End-to-end probes against compose stack (E2E_BASE_URL) or local server
     cmds:
-      - python3 -c "print('e2e - no user-facing flow yet, add when Real-users trigger fires')"
+      - python3 scripts/e2e.py
 
   test:contract:
     desc: Contract version + compatibility (oasdiff + schemathesis where versioned contract exists)
     cmds:
-      - python3 -c "import sys; print('contract - no versioned contract yet, N/A absent'); sys.exit(0)"
+      - python3 scripts/contract_check.py
 
   migrate:
     desc: Apply migrations; verify status before and after
     cmds:
-      - python3 -c "print('migrate - no migrations yet')"
+      - python3 scripts/migrate.py
 
   build:
     desc: Build the repeatable delivery artifact
@@ -38,20 +38,21 @@ tasks:
       - docker build -t service-starter:local .
 
   check:sast:
-    desc: Static analysis (Semgrep where installed; CodeQL default setup in repo settings)
+    desc: Static analysis (AST guard always; Semgrep where installed; CodeQL default setup covers PRs)
     cmds:
-      - sh -c 'if command -v semgrep >/dev/null 2>&1; then semgrep --config auto --error src; else python3 -c "print(\"sast - semgrep not installed locally, CodeQL default setup covers PRs\")"; fi'
+      - python3 scripts/sast_guard.py
+      - sh -c 'if command -v semgrep >/dev/null 2>&1; then semgrep --config auto --error src scripts; else echo "sast - semgrep not installed; AST guard ran above, CodeQL covers PRs"; fi'
 
   check:secrets:
     desc: Secrets scan (gitleaks where installed + pattern guard)
     cmds:
-      - sh -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-git -v ./src ./tests; else python3 -c "print(\"secrets - gitleaks not installed locally, running pattern guard\")"; fi'
+      - sh -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-git -v ./src ./tests; else echo "secrets - gitleaks not installed; running pattern guard"; fi'
       - python3 scripts/secrets_guard.py
 
   check:audit:
-    desc: Dependency audit
+    desc: Dependency audit (stdlib-only guard; pip audit when a manifest lands)
     cmds:
-      - python3 -c "print('audit - no third-party deps yet, pip audit when deps are added')"
+      - python3 scripts/audit.py
 
   check:hygiene:
     desc: Placeholders, path alignment, no echo stubs
@@ -64,9 +65,15 @@ tasks:
       - python3 scripts/diagrams.py
 
   verify:
-    desc: Full local gate
+    desc: Full local gate (no state changes; migrate excluded — it writes)
     cmds:
       - task: test
+      - task: test:int
+      - task: test:e2e
+      - task: test:contract
       - task: build
+      - task: check:sast
+      - task: check:secrets
+      - task: check:audit
       - task: check:hygiene
       - task: diagrams
