@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task test
 
   sast:
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task check:sast
 
   secrets-scan:
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task check:secrets
 
   audit:
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task check:audit
 
   integration:
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task test:int
 
   e2e:
@@ -85,7 +85,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task test:e2e
 
   contract-check:
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task test:contract
 
   build:
@@ -108,7 +108,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task build
 
   arch-validate:
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task diagrams
 
   hygiene:
@@ -128,7 +128,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: go-task/setup-task@v1
+      - uses: go-task/setup-task@v2
       - run: task check:hygiene
 
   gate:
