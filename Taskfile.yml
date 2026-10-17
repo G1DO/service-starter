@@ -1,0 +1,72 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: Start the system locally with dependencies
+    cmds:
+      - docker compose up --build
+
+  test:
+    desc: Fast required suite (lint + unit)
+    cmds:
+      - python3 -m compileall -q src tests
+      - python3 -m unittest discover -s tests/unit -v
+
+  test:int:
+    desc: Integration suite with real dependencies
+    cmds:
+      - python3 -m unittest discover -s tests/integration -v
+
+  test:e2e:
+    desc: End-to-end against real target or compose stack
+    cmds:
+      - python3 -c "print('e2e: no user-facing flow yet — add when Real-users trigger fires')"
+
+  test:contract:
+    desc: Contract version + compatibility (oasdiff + schemathesis where versioned contract exists)
+    cmds:
+      - python3 -c "import sys; print('contract: no versioned contract yet — N/A absent'); sys.exit(0)"
+
+  migrate:
+    desc: Apply migrations; verify status before and after
+    cmds:
+      - python3 -c "print('migrate: no migrations yet')"
+
+  build:
+    desc: Build the repeatable delivery artifact
+    cmds:
+      - docker build -t service-starter:local .
+
+  check:sast:
+    desc: Static analysis (Semgrep where installed; CodeQL default setup in repo settings)
+    cmds:
+      - sh -c 'if command -v semgrep >/dev/null 2>&1; then semgrep --config auto --error src; else python3 -c "print(\"sast: semgrep not installed locally; CodeQL default setup covers PRs\")"; fi'
+
+  check:secrets:
+    desc: Secrets scan (gitleaks where installed + pattern guard)
+    cmds:
+      - sh -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-git -v ./src ./tests; else python3 -c "print(\"secrets: gitleaks not installed locally; running pattern guard\")"; fi'
+      - python3 -c "import pathlib,re,sys; bad=[str(p) for p in list(pathlib.Path('.').rglob('*')) if p.is_file() and '.git/' not in str(p) and re.search(r'(?i)(ghp_|gho_|AKIA[0-9A-Z]{16}|xox[bap]-)', p.read_text(errors='ignore')[:20000])]; print('secret pattern hit:', bad); sys.exit(1 if bad else 0)"
+
+  check:audit:
+    desc: Dependency audit
+    cmds:
+      - python3 -c "print('audit: no third-party deps yet — pip audit when deps are added')"
+
+  check:hygiene:
+    desc: Placeholders, path alignment, no echo stubs
+    cmds:
+      - python3 scripts/hygiene.py
+
+  diagrams:
+    desc: Structurizr validate + Notion path+version link check (local only)
+    cmds:
+      - python3 scripts/diagrams.py
+
+  verify:
+    desc: Full local gate
+    cmds:
+      - task: test
+      - task: build
+      - task: check:hygiene
+      - task: diagrams

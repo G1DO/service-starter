@@ -1,0 +1,10 @@
+# CODEOWNERS — replace with real teams as the org grows; paths match CI data/contract filters.
+/src/auth/** @G1DO
+/src/data/** @G1DO
+/src/infra/** @G1DO
+/migrations/** @G1DO
+/infra/** @G1DO
+/docs/contracts/** @G1DO
+/openapi/** @G1DO
+/.github/ @G1DO
+* @G1DO
