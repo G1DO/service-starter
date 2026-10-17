@@ -6,7 +6,6 @@ workspace "service-starter" "Minimal C1/C2 for service-starter — sole source f
             api = container "API" "HTTP API" "Python" "Serves /livez, /readyz and domain routes."
         }
         user -> system "Uses"
-        user -> system.api "Calls"
     }
 
     views {

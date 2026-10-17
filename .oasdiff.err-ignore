@@ -1,0 +1,6 @@
+# Baseline for oasdiff breaking --fail-on ERR --err-ignore.
+# Each active line ignores one ERR-level change: method+path and description,
+# in any order or case (see oasdiff docs/BREAKING-CHANGES.md).
+# Empty (comments only) means no exceptions: every ERR fails the gate.
+# Must-resolve: contract_check.py fails if these entries match nothing,
+# so stale ignores cannot linger. Resolve, do not extend.

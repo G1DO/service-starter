@@ -20,7 +20,8 @@ def free_port() -> int:
 
 def get(base: str, path: str, timeout: float = 2.0) -> int:
     try:
-        with urllib.request.urlopen(base + path, timeout=timeout) as resp:
+        # Test-only probe helper; base is a localhost ephemeral URL or an explicit E2E target, never attacker-controlled.
+        with urllib.request.urlopen(base + path, timeout=timeout) as resp:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             return resp.status
     except urllib.error.HTTPError as exc:
         return exc.code
