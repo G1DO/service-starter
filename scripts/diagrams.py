@@ -21,4 +21,4 @@ for md in (root / "docs" / "architecture").rglob("*.md"):
     if re.search(r"```(mermaid|plantuml)", body):
         print(f"diagrams: {md} pastes a rendered copy — link path+version instead")
         sys.exit(1)
-print("diagrams: ok (DSL parse is shallow; run structurizr.sh validate in CI)")
+print("diagrams: ok (pointers valid; DSL validity via editor extension / Lite preview)")
