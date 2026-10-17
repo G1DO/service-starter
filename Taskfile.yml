@@ -46,7 +46,7 @@ tasks:
     desc: Secrets scan (gitleaks where installed + pattern guard)
     cmds:
       - sh -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-git -v ./src ./tests; else python3 -c "print(\"secrets - gitleaks not installed locally, running pattern guard\")"; fi'
-      - python3 -c "import pathlib,re,sys; bad=[str(p) for p in list(pathlib.Path('.').rglob('*')) if p.is_file() and '.git/' not in str(p) and re.search(r'(?i)(ghp_|gho_|AKIA[0-9A-Z]{16}|xox[bap]-)', p.read_text(errors='ignore')[:20000])]; print('secret pattern hit:', bad); sys.exit(1 if bad else 0)"
+      - python3 scripts/secrets_guard.py
 
   check:audit:
     desc: Dependency audit
