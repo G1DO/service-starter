@@ -38,21 +38,22 @@ tasks:
       - docker build -t service-starter:local .
 
   check:sast:
-    desc: Static analysis (AST guard always; Semgrep where installed; CodeQL default setup covers PRs)
+    desc: Static analysis (AST guard always; Semgrep --error fail-closed, no fallback; CodeQL default setup covers PRs)
     cmds:
       - python3 scripts/sast_guard.py
-      - sh -c 'if command -v semgrep >/dev/null 2>&1; then semgrep --config auto --error src scripts; else echo "sast - semgrep not installed; AST guard ran above, CodeQL covers PRs"; fi'
+      - semgrep --config auto --error src scripts
 
   check:secrets:
-    desc: Secrets scan (gitleaks where installed + pattern guard)
+    desc: Secrets scan (gitleaks working tree fail-closed plus pattern guard)
     cmds:
-      - sh -c 'if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-git -v ./src ./tests; else echo "secrets - gitleaks not installed; running pattern guard"; fi'
+      - gitleaks dir -v .
       - python3 scripts/secrets_guard.py
 
   check:audit:
-    desc: Dependency audit (stdlib-only guard; pip audit when a manifest lands)
+    desc: Dependency audit (stdlib guard plus osv-scanner fail-closed; pip audit when a manifest lands)
     cmds:
       - python3 scripts/audit.py
+      - osv-scanner scan source --allow-no-lockfiles -r .
 
   check:hygiene:
     desc: Placeholders, path alignment, no echo stubs
@@ -60,8 +61,9 @@ tasks:
       - python3 scripts/hygiene.py
 
   diagrams:
-    desc: DSL pointer check (validity via editor extension / Lite preview)
+    desc: Validate workspace.dsl via structurizr validate (Lite EOL)
     cmds:
+      - sh -c 'if command -v structurizr >/dev/null 2>&1; then structurizr validate -workspace docs/architecture/workspace.dsl; elif command -v structurizr.sh >/dev/null 2>&1; then structurizr.sh validate -workspace docs/architecture/workspace.dsl; elif test -x ./structurizr.sh; then ./structurizr.sh validate -workspace docs/architecture/workspace.dsl; elif [ "$CI" = "true" ]; then echo "diagrams - FAIL structurizr CLI missing in CI, STRUCTURAL-ONLY not allowed" >&2; exit 1; else echo "diagrams - structurizr CLI not installed; STRUCTURAL-ONLY fallback"; fi'
       - python3 scripts/diagrams.py
 
   verify:

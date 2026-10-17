@@ -24,7 +24,7 @@ for path in root.rglob("*"):
     if "TODO" + " CI" in text:
         failures.append(f"{path}: contains stub marker")
     if re.search(r"\|\|\s*true", text):
-        failures.append(f"{path}: swallows failures via || true")
+        failures.append(f"{path}: swallows failures via {'||'} true")
     if re.search("python3?\\s+-c\\s+[\"']print\\s*\\(", text):
         failures.append(f"{path}: contains inline print stub (move real logic into scripts/)")
     if re.search("assertTrue\\s*\\(\\s*True\\s*\\)", text):
@@ -39,9 +39,17 @@ if not re.search(r"(?m)^\*\s+@\S+", codeowners):
     failures.append("CODEOWNERS: missing fallback `*` owner")
 
 ci = (root / ".github" / "workflows" / "ci.yml").read_text()
-for needle in ("dorny/paths-filter", "needs: [changes", "contains(github.event.pull_request.labels"):
+nightly = (root / ".github" / "workflows" / "nightly.yml").read_text()
+for needle in ("task verify", "!cancelled()"):
     if needle not in ci:
         failures.append(f"ci.yml: missing {needle}")
+for banned in ("dorny/paths-filter", "paths-filter", "needs: [changes", "needs: [test]", "needs.changes", "force-integration", "force-e2e", "force-contract", "contains(github.event.pull_request.labels", "test:int", "test:e2e", "test:contract"):
+    if banned in ci:
+        failures.append(f"ci.yml: forbidden {banned}")
+if "task verify" not in nightly:
+    failures.append("nightly.yml: missing task verify")
+if nightly.count("run: task") != 1:
+    failures.append("nightly.yml: must run task verify only")
 
 if failures:
     print("\n".join(failures))
