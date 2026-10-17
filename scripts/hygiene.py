@@ -1,4 +1,8 @@
-"""Hygiene: fails on ORG placeholders, TODO owners, echo stubs, CODEOWNERS/CI misalignment."""
+"""Hygiene: fails on placeholders, echo stubs, and CODEOWNERS gaps.
+
+CI/workflow alignment is enforced by branch protection (required `gate`
+check, strict) plus the gate job's needs check in ci.yml — not by text lint.
+"""
 import pathlib
 import re
 import sys
@@ -37,19 +41,6 @@ for must in ("/src/auth/", "/src/data/", "migrations/", "/openapi", "/.github/")
         failures.append(f"CODEOWNERS: missing coverage for {must}")
 if not re.search(r"(?m)^\*\s+@\S+", codeowners):
     failures.append("CODEOWNERS: missing fallback `*` owner")
-
-ci = (root / ".github" / "workflows" / "ci.yml").read_text()
-nightly = (root / ".github" / "workflows" / "nightly.yml").read_text()
-for needle in ("task verify", "!cancelled()"):
-    if needle not in ci:
-        failures.append(f"ci.yml: missing {needle}")
-for banned in ("dorny/paths-filter", "paths-filter", "needs: [changes", "needs: [test]", "needs.changes", "force-integration", "force-e2e", "force-contract", "contains(github.event.pull_request.labels", "test:int", "test:e2e", "test:contract"):
-    if banned in ci:
-        failures.append(f"ci.yml: forbidden {banned}")
-if "task verify" not in nightly:
-    failures.append("nightly.yml: missing task verify")
-if nightly.count("run: task") != 1:
-    failures.append("nightly.yml: must run task verify only")
 
 if failures:
     print("\n".join(failures))

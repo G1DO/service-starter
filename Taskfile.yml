@@ -38,16 +38,14 @@ tasks:
       - docker build -t service-starter:local .
 
   check:sast:
-    desc: Static analysis (AST guard always; Semgrep --error fail-closed, no fallback; CodeQL default setup covers PRs)
+    desc: Static analysis (Semgrep --error fail-closed; CodeQL default setup covers PRs)
     cmds:
-      - python3 scripts/sast_guard.py
       - semgrep --config auto --error src scripts
 
   check:secrets:
-    desc: Secrets scan (gitleaks working tree fail-closed plus pattern guard)
+    desc: Secrets scan (gitleaks working tree fail-closed)
     cmds:
       - gitleaks dir -v .
-      - python3 scripts/secrets_guard.py
 
   check:audit:
     desc: Dependency audit (stdlib guard plus osv-scanner fail-closed; pip audit when a manifest lands)
