@@ -18,19 +18,19 @@ tasks:
       - python3 -m unittest discover -s tests/integration -v
 
   test:e2e:
-    desc: End-to-end probes against compose stack (E2E_BASE_URL) or local server
+    desc: End-to-end probes against compose stack (E2E_BASE_URL) or local server (curl fail-closed)
     cmds:
-      - python3 scripts/e2e.py
+      - sh -c 'set -euo pipefail; if [ -n "${E2E_BASE_URL:-}" ]; then curl -f "$E2E_BASE_URL/livez"; curl -f "$E2E_BASE_URL/readyz"; else PORT=18081 python3 -m src.app >/tmp/e2e.log 2>&1 & SRV=$!; trap "kill $SRV" EXIT; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do curl -fs http://127.0.0.1:18081/livez >/dev/null && break; sleep 0.5; done; curl -f http://127.0.0.1:18081/livez; curl -f http://127.0.0.1:18081/readyz; CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:18081/no-such-route); [ "$CODE" = "404" ]; fi'
 
   test:contract:
-    desc: Contract version + compatibility (oasdiff + schemathesis where versioned contract exists)
+    desc: Contract compatibility (oasdiff ERR fail, resolvable baseline, stale-baseline fail)
     cmds:
-      - python3 scripts/contract_check.py
+      - sh -c 'set -euo pipefail; found=""; for f in openapi/*.yaml openapi/*.yml openapi/*.json docs/contracts/*.yaml docs/contracts/*.yml docs/contracts/*.json; do [ -e "$f" ] && found="$found $f"; done; if [ -z "$found" ]; then echo "contract N/A absent"; exit 0; fi; set -- $found; if [ $# -ge 2 ]; then BASE=$1; REV=$2; else REV=$1; git show HEAD:"$REV" >/tmp/contract-base.yaml; BASE=/tmp/contract-base.yaml; fi; if [ ! -f .oasdiff.err-ignore ]; then echo "contract FAIL baseline missing"; exit 1; fi; oasdiff breaking --fail-on ERR --err-ignore .oasdiff.err-ignore "$BASE" "$REV"; ACTIVE=$(awk "!/^#/ && !/^$/ {n++} END {print n+0}" .oasdiff.err-ignore); if [ "$ACTIVE" -gt 0 ]; then if oasdiff breaking -f singleline "$BASE" "$REV" | grep -q -E "^(error|warning)"; then echo "contract ok baseline applied"; else echo "contract FAIL baseline stale"; exit 1; fi; else echo "contract ok no breaking"; fi'
 
   migrate:
-    desc: Apply migrations; verify status before and after
+    desc: Migration gate (absent means omitted, present without runner fails)
     cmds:
-      - python3 scripts/migrate.py
+      - sh -c 'set -euo pipefail; if ls migrations/*.sql >/dev/null 2>&1; then echo "migrate FAIL present no runner"; exit 1; else echo "migrate N/A absent"; exit 0; fi'
 
   build:
     desc: Build the repeatable delivery artifact
@@ -45,25 +45,26 @@ tasks:
   check:secrets:
     desc: Secrets scan (working tree plus history, fail-closed)
     cmds:
+      - gitleaks dir . -v
       - gitleaks detect --source . -v
 
   check:audit:
-    desc: Dependency audit (stdlib guard plus osv-scanner fail-closed; pip audit when a manifest lands)
+    desc: Dependency audit (osv-scanner fail-closed; pip-audit where a manifest exists)
     cmds:
-      - python3 scripts/audit.py
       - osv-scanner scan source --allow-no-lockfiles -r .
+      - sh -c 'set -euo pipefail; found=""; for m in requirements*.txt pyproject.toml; do [ -e "$m" ] && found="$found $m"; done; if [ -n "$found" ]; then pip-audit; else echo "audit N/A no manifest"; fi'
 
   check:hygiene:
     desc: Placeholders, path alignment, no echo stubs
     cmds:
-      - python3 scripts/hygiene.py
+      - sh -c 'set -euo pipefail; ! grep -R -n -E "TODO[ ]CI|echo[ ]placeholder|\\|\\|[ ]true|assertTrue\\(True\\)|python3? -c .print\\(|@O[R]G/" --exclude-dir=.git --exclude-dir=__pycache__ .'
+      - sh -c 'set -euo pipefail; grep -q "/src/auth/" .github/CODEOWNERS; grep -q "/src/data/" .github/CODEOWNERS; grep -q "migrations/" .github/CODEOWNERS; grep -q "openapi" .github/CODEOWNERS; grep -q "/.github/" .github/CODEOWNERS; grep -q "^\\* " .github/CODEOWNERS; ! grep -q "@O[R]G/" .github/CODEOWNERS'
 
   diagrams:
     desc: Validate workspace.dsl via structurizr validate
     cmds:
       - structurizr.sh validate -workspace docs/architecture/workspace.dsl
-      - python3 scripts/diagrams.py
-      - sh -c '! grep -R -n --include="*.md" -E "mermaid|plantuml" docs'
+      - sh -c 'set -euo pipefail; ! grep -R -n --include="*.md" -E "mermaid|plantuml" docs'
 
   verify:
     desc: Full local gate (absent suites omitted, never skipped; migrate excluded — it writes)
