@@ -1,4 +1,15 @@
-"""Probe helpers shared by the e2e verb and the integration suite (stdlib only)."""
+"""Probe helpers — shared by e2e and integration (stdlib only).
+
+Why this file exists:
+  Both `scripts/e2e.py` and `tests/integration/test_smoke.py` need the
+  same three checks against a live base URL. This holds them once:
+
+  - free_port() → an ephemeral 127.0.0.1 port for local runs.
+  - get() → GET base+path, returning HTTPError codes instead of raising.
+  - check_probes() → /livez 200, /readyz 200, unknown route 404.
+  - run_local() → start `src.app` as a subprocess, wait for /livez,
+    yield the base URL, then terminate.
+"""
 import contextlib
 import os
 import pathlib

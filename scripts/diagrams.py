@@ -1,5 +1,4 @@
-"""Diagrams: validate workspace.dsl via structurizr validate; check docs are pointers (Lite EOL)."""
-import os
+"""Diagrams: validate workspace.dsl via structurizr validate; check docs are pointers."""
 import pathlib
 import re
 import shutil
@@ -58,8 +57,7 @@ if cli is not None:
         print(f"diagrams: structurizr validate failed\n{out.strip()}")
         sys.exit(1)
     print("diagrams: ok (pointers valid; structurizr validate passed)")
+    sys.exit(0)
 else:
-    if os.environ.get("CI") == "true":
-        print("diagrams: FAIL — structurizr CLI missing in CI; STRUCTURAL-ONLY not allowed")
-        sys.exit(1)
-    print("diagrams: ok STRUCTURAL-ONLY (pointers valid; structural validation passed, structurizr CLI not installed)")
+    print("diagrams: FAIL — structurizr CLI missing; install it, validation must not pass without it")
+    sys.exit(1)
