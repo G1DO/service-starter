@@ -65,6 +65,23 @@ tasks:
       - python3 scripts/diagrams.py
       - sh -c '! grep -R -n --include="*.md" -E "mermaid|plantuml" docs'
 
+  sbom:
+    desc: SBOM in CycloneDX format via pinned osv-scanner (fail-closed; distribution only)
+    cmds:
+      - osv-scanner scan source --allow-no-lockfiles -r . --format cyclonedx-1-6 --output-file sbom.cdx.json
+
+  provenance:
+    desc: Provenance record for sbom.cdx.json from current commit (fail-closed; distribution only)
+    cmds:
+      - python3 scripts/provenance.py
+
+  deliver:
+    desc: Delivery for external distribution (build plus SBOM plus provenance; tags only)
+    cmds:
+      - task: build
+      - task: sbom
+      - task: provenance
+
   verify:
     desc: Full local gate (absent suites omitted, never skipped; migrate excluded — it writes)
     cmds:
