@@ -1,0 +1,6 @@
+# Baseline for gitleaks working-tree scans (gitleaks dir).
+# Each line is a fingerprint of a reviewed non-issue. Resolve, do not extend.
+# Fingerprint format: <path>:<rule>:<line>
+# test_app.py:39 is a fake token fixture for the log-redaction unit test
+# (tok-abc123-def456); it never leaves the test process.
+tests/unit/test_app.py:generic-api-key:39

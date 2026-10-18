@@ -1,4 +1,15 @@
-"""Probe helpers shared by the e2e verb and the integration suite (stdlib only)."""
+"""Probe helpers — shared by e2e and integration (stdlib only).
+
+Why this file exists:
+  Both `scripts/e2e.py` and `tests/integration/test_smoke.py` need the
+  same three checks against a live base URL. This holds them once:
+
+  - free_port() → an ephemeral 127.0.0.1 port for local runs.
+  - get() → GET base+path, returning HTTPError codes instead of raising.
+  - check_probes() → /livez 200, /readyz 200, unknown route 404.
+  - run_local() → start `src.app` as a subprocess, wait for /livez,
+    yield the base URL, then terminate.
+"""
 import contextlib
 import os
 import pathlib
@@ -20,7 +31,8 @@ def free_port() -> int:
 
 def get(base: str, path: str, timeout: float = 2.0) -> int:
     try:
-        with urllib.request.urlopen(base + path, timeout=timeout) as resp:
+        # Test-only probe helper; base is a localhost ephemeral URL or an explicit E2E target, never attacker-controlled.
+        with urllib.request.urlopen(base + path, timeout=timeout) as resp:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             return resp.status
     except urllib.error.HTTPError as exc:
         return exc.code

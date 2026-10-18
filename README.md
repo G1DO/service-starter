@@ -8,5 +8,3 @@ What this is: a long-lived service skeleton with health probes, structured JSON 
 - Docs: `docs/` in this repo.
 - Run: `task dev`
 - Verify: `task verify`
-
-# verify

@@ -39,7 +39,9 @@ def log(event: str, **fields: object) -> None:
     sys.stdout.write(json.dumps(record) + "\n")
 
 
-READY = {"db": True}
+# No external dependencies yet. When a dependency lands, add it here,
+# check it in readiness, and declare it in docker-compose.yml so parity holds.
+READY: dict = {}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -55,7 +57,8 @@ class Handler(BaseHTTPRequestHandler):
             # Liveness: cheap, no dependency checks.
             self._send(200)
         elif self.path == "/readyz":
-            # Readiness: includes dependency checks.
+            # Readiness: includes dependency checks. No dependencies yet,
+            # so readiness mirrors liveness until one lands (see READY above).
             if all(READY.values()):
                 self._send(200)
             else:

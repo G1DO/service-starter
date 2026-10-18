@@ -1,4 +1,6 @@
 services:
+  # No additional dependencies. Service is dependency-free; when one lands,
+  # declare it here so local, Testcontainers, and CI exercise the same services.
   api:
     build: .
     ports:
