@@ -50,13 +50,6 @@ jobs:
           osv-scanner --version
       - run: |
           set -euo pipefail
-          curl -fsSL -o /tmp/oasdiff.tar.gz "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
-          echo "${OASDIFF_SHA256}  /tmp/oasdiff.tar.gz" | sha256sum -c -
-          tar xzf /tmp/oasdiff.tar.gz -C /tmp oasdiff
-          sudo mv /tmp/oasdiff /usr/local/bin/oasdiff
-          oasdiff --version
-      - run: |
-          set -euo pipefail
           mkdir -p "$HOME/structurizr-cli"
           curl -fsSL -o /tmp/structurizr-cli.zip "https://github.com/structurizr/cli/releases/download/v${STRUCTURIZR_CLI_VERSION}/structurizr-cli.zip"
           echo "${STRUCTURIZR_CLI_SHA256}  /tmp/structurizr-cli.zip" | sha256sum -c -
