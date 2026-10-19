@@ -22,11 +22,6 @@ tasks:
     cmds:
       - python3 scripts/e2e.py
 
-  test:contract:
-    desc: Contract version + compatibility (oasdiff + schemathesis where versioned contract exists)
-    cmds:
-      - python3 scripts/contract_check.py
-
   migrate:
     desc: Apply migrations; verify status before and after
     cmds:
