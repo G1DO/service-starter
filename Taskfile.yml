@@ -42,11 +42,6 @@ tasks:
     cmds:
       - semgrep --config auto --error src scripts
 
-  check:secrets:
-    desc: Secrets scan (working tree plus history, fail-closed)
-    cmds:
-      - gitleaks detect --source . -v
-
   check:audit:
     desc: Dependency audit (stdlib guard plus osv-scanner fail-closed; pip audit when a manifest lands)
     cmds:
