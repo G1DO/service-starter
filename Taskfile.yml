@@ -32,11 +32,6 @@ tasks:
     cmds:
       - python3 scripts/migrate.py
 
-  build:
-    desc: Build the repeatable delivery artifact
-    cmds:
-      - docker build -t service-starter:local .
-
   check:sast:
     desc: Static analysis (Semgrep --error fail-closed; CodeQL default setup covers PRs)
     cmds:
