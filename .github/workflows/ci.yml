@@ -55,14 +55,6 @@ jobs:
           tar xzf /tmp/oasdiff.tar.gz -C /tmp oasdiff
           sudo mv /tmp/oasdiff /usr/local/bin/oasdiff
           oasdiff --version
-      - run: |
-          set -euo pipefail
-          mkdir -p "$HOME/structurizr-cli"
-          curl -fsSL -o /tmp/structurizr-cli.zip "https://github.com/structurizr/cli/releases/download/v${STRUCTURIZR_CLI_VERSION}/structurizr-cli.zip"
-          echo "${STRUCTURIZR_CLI_SHA256}  /tmp/structurizr-cli.zip" | sha256sum -c -
-          unzip -q -o /tmp/structurizr-cli.zip -d "$HOME/structurizr-cli"
-          test -x "$HOME/structurizr-cli/structurizr.sh"
-          echo "$HOME/structurizr-cli" >> "$GITHUB_PATH"
       - run: task verify
 
   gate:
