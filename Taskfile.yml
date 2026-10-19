@@ -45,6 +45,7 @@ tasks:
   check:secrets:
     desc: Secrets scan (working tree plus history, fail-closed)
     cmds:
+      - gitleaks dir . -v
       - gitleaks detect --source . -v
 
   check:audit:
