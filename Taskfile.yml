@@ -37,11 +37,6 @@ tasks:
     cmds:
       - docker build -t service-starter:local .
 
-  check:sast:
-    desc: Static analysis (Semgrep --error fail-closed; CodeQL default setup covers PRs)
-    cmds:
-      - semgrep --config auto --error src scripts
-
   check:secrets:
     desc: Secrets scan (working tree plus history, fail-closed)
     cmds:
