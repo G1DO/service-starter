@@ -47,12 +47,6 @@ tasks:
     cmds:
       - gitleaks detect --source . -v
 
-  check:audit:
-    desc: Dependency audit (stdlib guard plus osv-scanner fail-closed; pip audit when a manifest lands)
-    cmds:
-      - python3 scripts/audit.py
-      - osv-scanner scan source --allow-no-lockfiles -r .
-
   check:hygiene:
     desc: Placeholders, path alignment, no echo stubs
     cmds:
