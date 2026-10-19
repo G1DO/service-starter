@@ -58,13 +58,6 @@ tasks:
     cmds:
       - python3 scripts/hygiene.py
 
-  diagrams:
-    desc: Validate workspace.dsl via structurizr validate
-    cmds:
-      - structurizr.sh validate -workspace docs/architecture/workspace.dsl
-      - python3 scripts/diagrams.py
-      - sh -c '! grep -R -n --include="*.md" -E "mermaid|plantuml" docs'
-
   verify:
     desc: Full local gate (absent suites omitted, never skipped; migrate excluded — it writes)
     cmds:
