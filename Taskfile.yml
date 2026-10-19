@@ -17,11 +17,6 @@ tasks:
     cmds:
       - python3 -m unittest discover -s tests/integration -v
 
-  test:e2e:
-    desc: End-to-end probes against compose stack (E2E_BASE_URL) or local server
-    cmds:
-      - python3 scripts/e2e.py
-
   test:contract:
     desc: Contract version + compatibility (oasdiff + schemathesis where versioned contract exists)
     cmds:
