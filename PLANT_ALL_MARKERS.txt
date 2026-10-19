@@ -1,0 +1,6 @@
+marker @ORG/ placeholder
+echo placeholder stub
+TODO CI leftover
+swallow || true failure
+python3 -c "print(hello)"
+assertTrue(True)
