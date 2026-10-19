@@ -4,3 +4,4 @@
 # Empty (comments only) means no exceptions: every ERR fails the gate.
 # Must-resolve: contract_check.py fails if these entries match nothing,
 # so stale ignores cannot linger. Resolve, do not extend.
+active-ignore-for-stale-test GET /items api-path-removed-without-deprecation
