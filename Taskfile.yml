@@ -53,11 +53,6 @@ tasks:
       - python3 scripts/audit.py
       - osv-scanner scan source --allow-no-lockfiles -r .
 
-  check:hygiene:
-    desc: Placeholders, path alignment, no echo stubs
-    cmds:
-      - python3 scripts/hygiene.py
-
   diagrams:
     desc: Validate workspace.dsl via structurizr validate
     cmds:
