@@ -63,6 +63,7 @@ jobs:
           unzip -q -o /tmp/structurizr-cli.zip -d "$HOME/structurizr-cli"
           test -x "$HOME/structurizr-cli/structurizr.sh"
           echo "$HOME/structurizr-cli" >> "$GITHUB_PATH"
+      - run: sleep 120
       - run: task verify
 
   gate:
